@@ -242,7 +242,7 @@ enum DroidResult: Int {
     case movedStepAndFoundOxygen = 2
 }
 
-func findOxygen(fromPoint: Point, visited: inout Set<Point>) -> (foundOxygen: Bool, point: Point) {
+func findOxygen(fromPoint: Point, visited: Set<Point>, marked: inout Set<Point>) -> (foundOxygen: Bool, point: Point) {
     let result = Direction.allCases.reduce((false, fromPoint)) { accu, current in
         if accu.0 {
             return accu
@@ -250,9 +250,7 @@ func findOxygen(fromPoint: Point, visited: inout Set<Point>) -> (foundOxygen: Bo
         
         print(fromPoint)
         
-        visited.insert(fromPoint)
-        
-        let newPoint = Point(point: accu.1, direction: current)
+        let newPoint = Point(point: fromPoint, direction: current)
         if visited.contains(newPoint) {
             print("visited: ", newPoint)
             return accu
@@ -264,9 +262,10 @@ func findOxygen(fromPoint: Point, visited: inout Set<Point>) -> (foundOxygen: Bo
         
         switch droidResult {
             case .hitWall:
+                marked.insert(newPoint)
                 return accu
             case .movedStep:
-                return findOxygen(fromPoint: newPoint, visited: &visited)
+                return findOxygen(fromPoint: newPoint, visited: visited.union([fromPoint]), marked: &marked)
             case .movedStepAndFoundOxygen:
                 return (true, newPoint)
         }
@@ -275,12 +274,12 @@ func findOxygen(fromPoint: Point, visited: inout Set<Point>) -> (foundOxygen: Bo
     return result
 }
 
-var visited = Set<Point>()
-let (foundOxygen, point) = findOxygen(fromPoint: Point(x: 0, y: 0), visited: &visited)
+var marked = Set<Point>()
+let (foundOxygen, point) = findOxygen(fromPoint: Point(x: 0, y: 0), visited: [], marked: &marked)
 
 print(abs(point.x) + abs(point.y))
 
-let va = Array(visited)
+let va = Array(marked)
 
 let minX = va.min(by: {$0.x < $1.x })!.x
 let maxX = va.min(by: {$0.x > $1.x })!.x
@@ -291,7 +290,11 @@ let maxY = va.min(by: {$0.y > $1.y })!.y
 for y in (minY...maxY) {
     for x in minX...maxX {
         let present = va.filter{ $0.x == x && $0.y == y }.count > 0
-        print(present ? "X" : " " , terminator: "")
+        if x == 0 && y == 0 {
+            print("0" , terminator: "")
+        } else {
+            print(present ? "X" : " " , terminator: "")
+        }
     }
     print()
 }
