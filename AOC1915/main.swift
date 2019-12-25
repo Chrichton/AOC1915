@@ -198,15 +198,6 @@ enum Direction: Int, CaseIterable {
     case south = 2
     case west = 3
     case east = 4
-    
-    func next() -> Direction? {
-        switch self {
-        case .north: return .south
-            case .south: return .west
-            case .west: return .east
-            case .east: return nil
-        }
-    }
 }
 
 struct Point: Hashable {
@@ -242,7 +233,7 @@ enum DroidResult: Int {
     case movedStepAndFoundOxygen = 2
 }
 
-func findOxygen(fromPoint: Point, visited: Set<Point>, marked: inout Set<Point>) -> Point? {
+func findOxygen(fromPoint: Point, visited: Set<Point>, walls: inout Set<Point>) -> Point? {
     let result: Point? = Direction.allCases.reduce(nil) { accu, current in
         if accu != nil {
             return accu
@@ -262,10 +253,10 @@ func findOxygen(fromPoint: Point, visited: Set<Point>, marked: inout Set<Point>)
         
         switch droidResult {
             case .hitWall:
-                marked.insert(newPoint)
+                walls.insert(newPoint)
                 return nil
             case .movedStep:
-                return findOxygen(fromPoint: newPoint, visited: visited.union([fromPoint]), marked: &marked)
+                return findOxygen(fromPoint: newPoint, visited: visited.union([fromPoint]), walls: &walls)
             case .movedStepAndFoundOxygen:
                 return newPoint
         }
@@ -274,12 +265,14 @@ func findOxygen(fromPoint: Point, visited: Set<Point>, marked: inout Set<Point>)
     return result
 }
 
-var marked = Set<Point>()
-if let point = findOxygen(fromPoint: Point(x: 0, y: 0), visited: Set<Point>(), marked: &marked) {
+var walls = Set<Point>()
+if let point = findOxygen(fromPoint: Point(x: 0, y: 0), visited: Set<Point>(), walls: &walls) {
     print(abs(point.x) + abs(point.y))
+} else {
+    print("Oxygen NOT found!")
 }
 
-let va = Array(marked)
+let va = Array(walls)
 
 let minX = va.min(by: {$0.x < $1.x })!.x
 let maxX = va.min(by: {$0.x > $1.x })!.x
