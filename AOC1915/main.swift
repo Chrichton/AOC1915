@@ -242,9 +242,9 @@ enum DroidResult: Int {
     case movedStepAndFoundOxygen = 2
 }
 
-func findOxygen(fromPoint: Point, visited: Set<Point>, marked: inout Set<Point>) -> (foundOxygen: Bool, point: Point) {
-    let result = Direction.allCases.reduce((false, fromPoint)) { accu, current in
-        if accu.0 {
+func findOxygen(fromPoint: Point, visited: Set<Point>, marked: inout Set<Point>) -> Point? {
+    let result: Point? = Direction.allCases.reduce(nil) { accu, current in
+        if accu != nil {
             return accu
         }
         
@@ -263,11 +263,11 @@ func findOxygen(fromPoint: Point, visited: Set<Point>, marked: inout Set<Point>)
         switch droidResult {
             case .hitWall:
                 marked.insert(newPoint)
-                return accu
+                return nil
             case .movedStep:
                 return findOxygen(fromPoint: newPoint, visited: visited.union([fromPoint]), marked: &marked)
             case .movedStepAndFoundOxygen:
-                return (true, newPoint)
+                return newPoint
         }
     }
     
@@ -275,9 +275,9 @@ func findOxygen(fromPoint: Point, visited: Set<Point>, marked: inout Set<Point>)
 }
 
 var marked = Set<Point>()
-let (foundOxygen, point) = findOxygen(fromPoint: Point(x: 0, y: 0), visited: [], marked: &marked)
-
-print(abs(point.x) + abs(point.y))
+if let point = findOxygen(fromPoint: Point(x: 0, y: 0), visited: Set<Point>(), marked: &marked) {
+    print(abs(point.x) + abs(point.y))
+}
 
 let va = Array(marked)
 
