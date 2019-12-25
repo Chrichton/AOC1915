@@ -244,7 +244,7 @@ func findOxygen(fromPoint: Point, visited: Set<Point>, walls: inout Set<Point>) 
         let newPoint = Point(point: fromPoint, direction: current)
         if visited.contains(newPoint) {
             print("visited: ", newPoint)
-            return accu
+            return nil
         }
         
         let droidResult = DroidResult(rawValue: program.run(input: current.rawValue))!
