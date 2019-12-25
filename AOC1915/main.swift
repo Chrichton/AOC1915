@@ -209,7 +209,7 @@ enum Direction: Int, CaseIterable {
     }
 }
 
-struct Point {
+struct Point: Hashable {
     let x: Int
     let y: Int
     
@@ -242,19 +242,31 @@ enum DroidResult: Int {
     case movedStepAndFoundOxygen = 2
 }
 
-func findOxygen(fromPoint: Point, inDirection: Direction) -> (foundOxygen: Bool, point: Point) {
-    let result = Direction.allCases.reduce((false, point)) { accu, current in
+func findOxygen(fromPoint: Point, visited: inout Set<Point>) -> (foundOxygen: Bool, point: Point) {
+    let result = Direction.allCases.reduce((false, fromPoint)) { accu, current in
         if accu.0 {
             return accu
         }
         
+        print(fromPoint)
+        
+        visited.insert(fromPoint)
+        
         let newPoint = Point(point: accu.1, direction: current)
+        if visited.contains(newPoint) {
+            print("visited: ", newPoint)
+            return accu
+        }
+        
         let droidResult = DroidResult(rawValue: program.run(input: current.rawValue))!
+        
+        print(droidResult)
+        
         switch droidResult {
             case .hitWall:
                 return accu
             case .movedStep:
-                return findOxygen(fromPoint: newPoint, inDirection: .north)
+                return findOxygen(fromPoint: newPoint, visited: &visited)
             case .movedStepAndFoundOxygen:
                 return (true, newPoint)
         }
@@ -263,6 +275,23 @@ func findOxygen(fromPoint: Point, inDirection: Direction) -> (foundOxygen: Bool,
     return result
 }
 
-let (foundOxygen, point) = findOxygen(fromPoint: Point(x: 0, y: 0), inDirection: .north)
+var visited = Set<Point>()
+let (foundOxygen, point) = findOxygen(fromPoint: Point(x: 0, y: 0), visited: &visited)
 
 print(abs(point.x) + abs(point.y))
+
+let va = Array(visited)
+
+let minX = va.min(by: {$0.x < $1.x })!.x
+let maxX = va.min(by: {$0.x > $1.x })!.x
+let minY = va.min(by: {$0.y < $1.y })!.y
+let maxY = va.min(by: {$0.y > $1.y })!.y
+
+
+for y in (minY...maxY) {
+    for x in minX...maxX {
+        let present = va.filter{ $0.x == x && $0.y == y }.count > 0
+        print(present ? "X" : " " , terminator: "")
+    }
+    print()
+}
