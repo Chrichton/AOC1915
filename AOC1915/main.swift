@@ -193,6 +193,35 @@ let memoryString = """
 
 var program = Program(memory: memoryString)
 
+func printMap(walls: [Point], point: Point) {
+    guard walls.count > 0 else {
+        return
+    }
+    
+    let minX = min(walls.min(by: {$0.x < $1.x })!.x, point.x)
+    let maxX = max(walls.min(by: {$0.x > $1.x })!.x, point.x)
+    let minY = min(walls.min(by: {$0.y < $1.y })!.y, point.y)
+    let maxY = max(walls.min(by: {$0.y > $1.y })!.y, point.y)
+
+
+    for y in (minY...maxY) {
+        for x in minX...maxX {
+            let present = walls.filter{ $0.x == x && $0.y == y }.count > 0
+            if x == 0 && y == 0 {
+                print("0" , terminator: "")
+            } else if point.x == x && point.y == y {
+                print("D" , terminator: "")
+            }
+            else {
+                print(present ? "X" : " " , terminator: "")
+            }
+        }
+        print()
+    }
+    
+    print("----------------------------------------")
+}
+
 enum Direction: Int, CaseIterable {
     case north = 1
     case east = 4
@@ -254,6 +283,8 @@ func findOxygen(fromPoint: Point, fromDirection: Direction?, visited: [Point], w
             return accu
         }
         
+        printMap(walls: Array(walls), point: fromPoint)
+        
         let newPoint = Point(point: fromPoint, direction: current)
         if visited.contains(newPoint) {
             if current == Direction.allCases.last! {
@@ -288,22 +319,6 @@ if let point = findOxygen(fromPoint: Point(x: 0, y: 0), fromDirection: nil, visi
     print("Oxygen NOT found!")
 }
 
-let va = Array(walls)
-
-let minX = va.min(by: {$0.x < $1.x })!.x
-let maxX = va.min(by: {$0.x > $1.x })!.x
-let minY = va.min(by: {$0.y < $1.y })!.y
-let maxY = va.min(by: {$0.y > $1.y })!.y
+printMap(walls: Array(walls), point: Point(x: 1, y: 1))
 
 
-for y in (minY...maxY) {
-    for x in minX...maxX {
-        let present = va.filter{ $0.x == x && $0.y == y }.count > 0
-        if x == 0 && y == 0 {
-            print("D" , terminator: "")
-        } else {
-            print(present ? "X" : " " , terminator: "")
-        }
-    }
-    print()
-}
