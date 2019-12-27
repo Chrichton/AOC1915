@@ -193,27 +193,26 @@ let memoryString = """
 
 var program = Program(memory: memoryString)
 
-func printMap(walls: [Point], point: Point) {
-    guard walls.count > 0 else {
+func printMaze(maze: [Point:Character], point: Point) {
+    guard maze.count > 0 else {
         return
     }
     
-    let minX = min(walls.min(by: {$0.x < $1.x })!.x, point.x)
-    let maxX = max(walls.min(by: {$0.x > $1.x })!.x, point.x)
-    let minY = min(walls.min(by: {$0.y < $1.y })!.y, point.y)
-    let maxY = max(walls.min(by: {$0.y > $1.y })!.y, point.y)
+    let minX = min(maze.keys.min(by: {$0.x < $1.x })!.x, point.x)
+    let maxX = max(maze.keys.min(by: {$0.x > $1.x })!.x, point.x)
+    let minY = min(maze.keys.min(by: {$0.y < $1.y })!.y, point.y)
+    let maxY = max(maze.keys.min(by: {$0.y > $1.y })!.y, point.y)
 
 
     for y in (minY...maxY) {
         for x in minX...maxX {
-            let present = walls.filter{ $0.x == x && $0.y == y }.count > 0
             if x == 0 && y == 0 {
                 print("0" , terminator: "")
             } else if point.x == x && point.y == y {
                 print("D" , terminator: "")
             }
             else {
-                print(present ? "X" : " " , terminator: "")
+                print(maze[Point(x: x, y: y)] ?? " " , terminator: "")
             }
         }
         print()
@@ -277,13 +276,14 @@ func backTrace(_ fromDirection: Direction?) {
     }
 }
 
-func findOxygen(fromPoint: Point, fromDirection: Direction?, visited: [Point], walls: inout Set<Point>) -> Point? {
+func findOxygen(fromPoint: Point, fromDirection: Direction?, visited: [Point], maze: inout [Point:Character]) -> Point? {
     let result: Point? = Direction.allCases.reduce(nil) { accu, current in
         if accu != nil {
             return accu
         }
         
-        printMap(walls: Array(walls), point: fromPoint)
+        maze[fromPoint] = "."
+        printMaze(maze: maze, point: fromPoint)
         
         let newPoint = Point(point: fromPoint, direction: current)
         if visited.contains(newPoint) {
@@ -293,10 +293,10 @@ func findOxygen(fromPoint: Point, fromDirection: Direction?, visited: [Point], w
         let droidResult = DroidResult(rawValue: program.run(input: current.rawValue))!
         switch droidResult {
             case .hitWall:
-                walls.insert(newPoint)
+                maze[newPoint] = "#"
                 return nil
             case .movedStep:
-                return findOxygen(fromPoint: newPoint, fromDirection: current, visited: visited + [fromPoint], walls: &walls)
+                return findOxygen(fromPoint: newPoint, fromDirection: current, visited: visited + [fromPoint], maze: &maze)
             case .movedStepAndFoundOxygen:
                 return newPoint
         }
@@ -307,13 +307,13 @@ func findOxygen(fromPoint: Point, fromDirection: Direction?, visited: [Point], w
     return result
 }
 
-var walls = Set<Point>()
-if let point = findOxygen(fromPoint: Point(x: 0, y: 0), fromDirection: nil, visited: [Point](), walls: &walls) {
+var maze = [Point:Character]()
+if let point = findOxygen(fromPoint: Point(x: 0, y: 0), fromDirection: nil, visited: [Point](), maze: &maze) {
     print(abs(point.x) + abs(point.y))
 } else {
     print("Oxygen NOT found!")
 }
 
-printMap(walls: Array(walls), point: Point(x: 1, y: 1))
+printMaze(maze: [Point:Character](), point: Point(x: 1, y: 1))
 
 
