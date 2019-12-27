@@ -311,6 +311,7 @@ func findOxygen(fromPoint: Point, fromDirection: Direction?, visited: [Point], m
 var maze = [Point:Character]()
 let pathToOxygen = findOxygen(fromPoint: Point(x: 0, y: 0), fromDirection: nil, visited: [Point](), maze: &maze)
 if pathToOxygen.count > 0 {
+    print("Oxygen at: ", pathToOxygen.last!)
     print(pathToOxygen.count)
 } else {
     print("Oxygen NOT found!")
