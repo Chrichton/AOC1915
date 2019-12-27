@@ -206,10 +206,10 @@ func printMaze(maze: [Point:Character], point: Point) {
 
     for y in (minY...maxY) {
         for x in minX...maxX {
-            if x == 0 && y == 0 {
-                print("0" , terminator: "")
-            } else if point.x == x && point.y == y {
+            if point.x == x && point.y == y {
                 print("D" , terminator: "")
+            } else if x == 0 && y == 0 {
+                print("0" , terminator: "")
             }
             else {
                 print(maze[Point(x: x, y: y)] ?? " " , terminator: "")
@@ -298,6 +298,7 @@ func findOxygen(fromPoint: Point, fromDirection: Direction?, visited: [Point], m
             case .movedStep:
                 return findOxygen(fromPoint: newPoint, fromDirection: current, visited: visited + [fromPoint], maze: &maze)
             case .movedStepAndFoundOxygen:
+                maze[newPoint] = "O"
                 return newPoint
         }
     }
@@ -314,6 +315,6 @@ if let point = findOxygen(fromPoint: Point(x: 0, y: 0), fromDirection: nil, visi
     print("Oxygen NOT found!")
 }
 
-printMaze(maze: [Point:Character](), point: Point(x: 1, y: 1))
+printMaze(maze: maze, point: Point(x: 0, y: 0))
 
 
