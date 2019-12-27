@@ -278,10 +278,10 @@ func backTrace(_ fromDirection: Direction?) {
 
 func findOxygen(fromPoint: Point, fromDirection: Direction?, visited: [Point], maze: inout [Point:Character]) -> [Point] {
     let result: [Point] = Direction.allCases.reduce([]) { accu, current in
-        if accu != [] {
-            return accu
-        }
-        
+//        if accu != [] {
+//            return accu
+//        }
+//
         maze[fromPoint] = "."
 //        printMaze(maze: maze, point: fromPoint)
         
@@ -299,7 +299,7 @@ func findOxygen(fromPoint: Point, fromDirection: Direction?, visited: [Point], m
                 return findOxygen(fromPoint: newPoint, fromDirection: current, visited: visited + [fromPoint], maze: &maze)
             case .movedStepAndFoundOxygen:
                 maze[newPoint] = "O"
-                return visited + [newPoint]
+                return findOxygen(fromPoint: newPoint, fromDirection: current, visited: visited + [fromPoint], maze: &maze)
         }
     }
     
@@ -319,4 +319,47 @@ if pathToOxygen.count > 0 {
 
 printMaze(maze: maze, point: Point(x: 0, y: 0))
 
+// Oxygen at: Point(x: -20, y: -14)
 
+// -------------------------------------------------------------
+
+extension Point {
+    func adjacentPoints() -> [Point] {
+        return [
+            Point(x: self.x + 1, y: self.y),
+            Point(x: self.x - 1, y: self.y),
+            Point(x: self.x, y: self.y + 1),
+            Point(x: self.x, y: self.y - 1)
+        ]
+    }
+}
+
+func nextState(maze: [Point:Character], newOxygens: [Point]) -> (maze: [Point:Character], newOxygens: [Point]) {
+    var addedOxygens = [Point]()
+    var newMaze = maze
+    for newOxygen in newOxygens {
+        for adjancentPoint in newOxygen.adjacentPoints() {
+            if maze[adjancentPoint, default: "#"] == "." {
+                newMaze[adjancentPoint] = "O"
+                addedOxygens.append(adjancentPoint)
+            }
+        }
+    }
+    
+    return (newMaze, addedOxygens)
+}
+
+//while nextState(maze: maze, newOxygens: [Point(x: -20, y: -14)]).maze.values.contains(".") {
+//while nextState(maze: maze, newOxygens: [Point(x: -20, y: -14)]).newOxygens.count > 0 {
+
+maze[Point(x: -20, y: -14)] = "O"
+printMaze(maze: maze, point: Point(x: 0, y: 0))
+
+var count = 0
+var next = nextState(maze: maze, newOxygens: [Point(x: -20, y: -14)])
+while next.newOxygens.count > 0 {
+    count += 1
+    next = nextState(maze: next.maze, newOxygens: next.newOxygens)
+}
+
+print(count)
